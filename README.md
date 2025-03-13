@@ -17,6 +17,13 @@ The **Dynamic Student Grouping System** is a web application designed to efficie
 ✅ **Data Export:** Export grouped student data as a CSV file for records.  
 
 ---
+## 🛠 Tech Stack
+
+- **Frontend:** React.js (with modern UI/UX styling using CSS)  
+- **Backend:** Flask (Python)  
+- **Database:** SQL for efficient data storage and management  
+- **Email System:** SMTP for automated notifications  
+
 
 ## 📖 Usage
 
@@ -33,7 +40,7 @@ The **Dynamic Student Grouping System** is a web application designed to efficie
 
 | Name        | CGPA | LeetCode_Questions | Email                   | Previous_Section |
 |--------------|--------|----------------------------|-----------------------|------------------------|
-| John Doe        | 8.5     | 120                                    | john.doe@example.com  | A |
+| Student78     | 8.5     | 220                                    | student78@example.com  | A |
 
 ---
 
