@@ -51,14 +51,4 @@ The **Dynamic Student Grouping System** is a web application designed to efficie
 
 ---
 
-## 🤝 Contribution
-Contributions are welcome! Feel free to fork the repository, raise issues, and submit pull requests.  
-
----
-
-## 📜 License
-This project is licensed under the [MIT License](LICENSE).
-
----
-
 For any inquiries or feedback, feel free to reach out! 🚀
