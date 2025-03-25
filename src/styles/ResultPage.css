@@ -1,0 +1,114 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f8ff;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-container {
+  max-width: 90%;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+h1, h2 {
+  text-align: center;
+  color: #1976d2;
+}
+
+.summary-details {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 18px;
+  background: #e3f2fd;
+  padding: 10px;
+  border: 2px solid #90caf9;
+  border-radius: 8px;
+}
+
+/* Improved Section Header Styling */
+.section-header {
+  background-color: #1976d2;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 12px 20px;
+  margin-top: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.section-header:hover {
+  background-color: #1565c0;
+  transform: scale(1.02); 
+}
+
+.section-toggle-icon {
+  font-size: 20px;
+  color: #ffffff;
+  transition: transform 0.3s ease;
+}
+
+.section-header.open .section-toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  border: 1px solid #90caf9;
+  padding: 10px;
+  text-align: center;
+}
+
+th {
+  background-color: #1976d2;
+  color: #fff;
+}
+
+.student-table th {
+  background-color: #42a5f5;
+}
+
+.student-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* Error Handling */
+.error-container {
+  text-align: center;
+  color: red;
+  margin-top: 50px;
+}
+
+.back-button, .export-button {
+  display: block;
+  text-align: center;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  width: 200px;
+  transition: background 0.3s;
+}
+
+.back-button:hover, .export-button:hover {
+  background-color: #1565c0;
+}
