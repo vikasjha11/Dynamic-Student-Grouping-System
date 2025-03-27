@@ -6,7 +6,7 @@ import './styles/App.css';
 
 function HomePage() {
   const [sections, setSections] = useState('');
-  const [maxStudents, setMaxStudents] = useState('');
+  // const [maxStudents, setMaxStudents] = useState('');
   const [file, setFile] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ function HomePage() {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('sections', sections);
-    formData.append('maxStudents', maxStudents);
+    // formData.append('maxStudents', maxStudents);
 
     setIsProcessing(true);
 
@@ -79,14 +79,14 @@ function HomePage() {
           />
         </div>
 
-        <div className="input-group">
+        {/* <div className="input-group">
           <label>Max Number of Students:</label>
           <input
             type="number"
             value={maxStudents}
             onChange={(e) => setMaxStudents(e.target.value)}
           />
-        </div>
+        </div> */}
 
         <div className="input-group">
           <label>Upload Students Data:</label>

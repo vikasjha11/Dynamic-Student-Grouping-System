@@ -1,20 +1,19 @@
 from flask import Flask, request, jsonify
 import pandas as pd
-import numpy as np
-from flask_cors import CORS
 import os
+from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
 UPLOAD_FOLDER = 'uploads'
-PROCESSED_FOLDER = 'processed'  # Folder for processed files
+PROCESSED_FOLDER = 'processed'
 
 # Ensure directories exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
-# Sorting Logic
+# Sorting Logic: Best in A, next best in B, and so on till the last section
 def process_student_data(csv_file, num_sections):
     df = pd.read_csv(csv_file)  # Load CSV  
 
@@ -31,10 +30,7 @@ def process_student_data(csv_file, num_sections):
 
     # Normalize LeetCode questions
     max_leetcode = df['LeetCode_Questions'].max()
-    if max_leetcode == 0:
-        df['Normalized_LeetCode'] = 0
-    else:
-        df['Normalized_LeetCode'] = (df['LeetCode_Questions'] / max_leetcode) * 10
+    df['Normalized_LeetCode'] = 0 if max_leetcode == 0 else (df['LeetCode_Questions'] / max_leetcode) * 10
     
     # Calculate Final Score
     df['Final_Score'] = (4 * df['CGPA']) + (2 * df['Normalized_LeetCode'])
@@ -43,42 +39,29 @@ def process_student_data(csv_file, num_sections):
     df['Normalized_LeetCode'] = df['Normalized_LeetCode'].round(3)
     df['Final_Score'] = df['Final_Score'].round(3)
 
-    # Sort by Final Score
+    # Sort by Final Score (Highest to Lowest)
     df = df.sort_values(by='Final_Score', ascending=False).reset_index(drop=True)
 
     # Store previous section assignments
     df['Previous_Section'] = df['Section']
 
-    # Improved Section Allotment Logic (Balanced Round Robin)
+    # Assign sections from top to bottom
+    section_labels = [chr(65 + i) for i in range(num_sections)]  
     num_students = len(df)
-    top_students = df.iloc[:num_students // 3]      # Top 33% (Good)
-    mid_students = df.iloc[num_students // 3: 2 * num_students // 3]  # Middle 33% (Medium)
-    low_students = df.iloc[2 * num_students // 3:]  # Bottom 33% (Weak)
+    students_per_section = num_students // num_sections
+    remainder = num_students % num_sections  
 
-    # Assign sections in a balanced way
-    section_labels = [chr(65 + i) for i in range(num_sections)]
-    sections = {label: [] for label in section_labels}
-
-    for group in [top_students, mid_students, low_students]:
-        for i, (_, student) in enumerate(group.iterrows()):
-            section = section_labels[i % num_sections]
-            sections[section].append(student)
-
-    # Convert to DataFrame
-    final_students = []
-    for section, students in sections.items():
-        for student in students:
-            student_data = student.to_dict()
-            student_data["Section"] = section
-            final_students.append(student_data)
-
-    final_df = pd.DataFrame(final_students)
+    current_index = 0
+    for i, section in enumerate(section_labels):
+        count = students_per_section + (1 if i < remainder else 0)  
+        df.loc[current_index: current_index + count - 1, 'Section'] = section
+        current_index += count
 
     # Save updated CSV file inside the 'processed' folder
     processed_file_path = os.path.join(PROCESSED_FOLDER, "grouped_students.csv")
-    final_df.to_csv(processed_file_path, index=False)
+    df.to_csv(processed_file_path, index=False)
 
-    return final_df[['Name', 'CGPA', 'LeetCode_Questions', 'Normalized_LeetCode', 'Final_Score', 'Previous_Section', 'Section', 'Email']]
+    return df[['Name', 'CGPA', 'LeetCode_Questions', 'Normalized_LeetCode', 'Final_Score', 'Previous_Section', 'Section', 'Email']]
 
 
 @app.route('/upload', methods=['POST'])
@@ -101,6 +84,7 @@ def upload_file():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
