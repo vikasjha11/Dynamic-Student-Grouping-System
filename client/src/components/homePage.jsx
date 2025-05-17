@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import {useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import ResultPage from './ResultPage';
-import './styles/App.css';
+import logo from "../assets/logo.jpg"
 
-function HomePage() {
+export function HomePage() {
   const [sections, setSections] = useState('');
   // const [maxStudents, setMaxStudents] = useState('');
   const [file, setFile] = useState(null);
@@ -63,7 +62,7 @@ function HomePage() {
   return (
     <div className="container">
       <div className="logo">
-        <img src="/logo.jpg" alt="Logo" />
+        <img src={logo} alt="Logo" />
       </div>
 
       <h1>Dynamic Student Grouping System</h1>
@@ -110,16 +109,3 @@ function HomePage() {
     </div>
   );
 }
-
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/result" element={<ResultPage />} />
-      </Routes>
-    </Router>
-  );
-}
-
-export default App;
