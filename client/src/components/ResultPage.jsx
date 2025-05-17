@@ -1,8 +1,8 @@
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import './styles/ResultPage.css';
+import '../styles/ResultPage.css';
 
-function ResultPage() {
+export function ResultPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { summary, students, isProcessing } = location.state || {};
