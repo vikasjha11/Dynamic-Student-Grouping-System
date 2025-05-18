@@ -1,17 +1,16 @@
-Name,CGPA,LeetCode_ID,Email
-Student_1,7.75,Bhavesh_Tripathi,student1@college.edu	
-Student_2,8.89,Saloni_06,student2@college.edu		
-Student_3,6.65,sakshiii_16,student3@college.edu		
-Student_4,8.45,hostmon,student4@college.edu		
-Student_5,5.95,raghavi_22,student5@college.edu		
-Student_6,3.80,vikas_jha_19,student6@college.edu		
-Student_7,7.55,alice_j,student7@college.edu		
-Student_8,8.80,thebug,student8@college.edu		
-Student_9,4.80,gst2604,student9@college.edu		
-Student_10,9.20,fjzzq2002,student10@college.edu		
-Student_11,8.20,anshi_mishra,student11@college.edu		
-Student_12,6.76,neal_wu,student12@college.edu		
-Student_13,9.34,Yawn_Sean,student13@college.edu		
-Student_14,5.68,Bharat_34,student14@college.edu		
-Student_15,7.86,aayush_m23,student15@college.edu	
-
+Name,CGPA,Email,LeetCode_ID,No._of_Leetcode_question
+Vikas Kumar Jha,8.18,vikaskumarjha763@gmail.com,vikas_jha_19,30
+Saloni Kanyal,9.2,student10@college.edu,Saloni_06,15
+Ankita Bhatt,10,ankita2000bhatt@gmail.com,vikas_jha_19,15
+Student_4,8.45,student4@college.edu,hostmon,15
+Student_8,8.8,student8@college.edu,thebug,15
+Student_11,8.2,student11@college.edu,anshi_mishra,15
+Student_1,7.75,student1@college.edu,Bhavesh_Tripathi,15
+Student_12,6.76,student12@college.edu,neal_wu,15
+Student_15,7.86,student15@college.edu,aayush_m23,15
+Student_7,7.55,student7@college.edu,alice_j,15
+Student_3,6.65,student3@college.edu,sakshiii_16,15
+Student_14,5.68,student14@college.edu,Bharat_34,15
+Student_5,5.95,student5@college.edu,raghavi_22,15
+Student_9,4.8,student9@college.edu,gst2604,15
+Student_6,3.8,student6@college.edu,Bharata,15

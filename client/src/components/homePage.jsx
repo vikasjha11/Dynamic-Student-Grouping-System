@@ -106,6 +106,13 @@ export function HomePage() {
 
         <button type="submit">Submit</button>
       </form>
+
+      {isProcessing && (
+        <div className="modal">
+          <h2>Processing Data</h2>
+          <p>Your file is being processed. Please wait...</p>
+        </div>
+      )}
     </div>
   );
 }

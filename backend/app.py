@@ -4,14 +4,16 @@ import os
 from flask_cors import CORS
 from flask_mail import Mail
 from email_service import send_notification
-from config import SMTP_SERVER, SMTP_PORT, EMAIL_SENDER, EMAIL_PASSWORD
+from emailconfig import SMTP_SERVER, SMTP_PORT, EMAIL_SENDER, EMAIL_PASSWORD
 import requests
 import json
 import concurrent.futures
 import time
+from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # Mail Configuration
 app.config['MAIL_SERVER'] = SMTP_SERVER
@@ -60,38 +62,38 @@ def get_leetcode_questions(leetcode_id, retries=3, delay=2):
             response = requests.post(url, headers=headers, json=query, timeout=10)
             response.raise_for_status()
             data = response.json()
-
-            if 'data' in data and data['data']['matchedUser']:
-                ac_data = data['data']['matchedUser']['submitStats']['acSubmissionNum']
-                total_solved = sum(d['count'] for d in ac_data if d['difficulty'] != 'All')
-                print(f"[OK] {leetcode_id}: {total_solved}")
-                return total_solved
-
-            print(f"[Invalid] {leetcode_id} not found")
-            return 0
+            # Extract total solved count
+            ac_list = (
+                data.get("data", {})
+                .get("matchedUser", {})
+                .get("submitStats", {})
+                .get("acSubmissionNum", [])
+            )
+            total_solved = 0
+            for item in ac_list:
+                if item.get("difficulty") == "All":
+                    total_solved = item.get("count", 0)
+                    break
+            return total_solved
         except Exception as e:
-            print(f"[Attempt {attempt+1}] Error fetching LeetCode data for {leetcode_id}: {e}")
-            time.sleep(delay)
-    return 0
+            if attempt < retries - 1:
+                time.sleep(delay)
+            else:
+                return None
 
 def process_student_data(csv_file, num_sections):
     df = pd.read_csv(csv_file)
     df.columns = df.columns.str.strip().str.replace(" ", "_")
 
-    required_columns = {'Name', 'CGPA', 'LeetCode_ID', 'Email'}
+    required_columns = {'Name', 'CGPA', 'LeetCode_ID', 'Email', 'No._of_Leetcode_question'}
     if not required_columns.issubset(df.columns):
         raise ValueError(f"CSV file must contain columns: {required_columns}, but found {df.columns}")
 
     if 'Section' not in df.columns:
         df['Section'] = None
 
-    df['LeetCode_Username'] = df['LeetCode_ID'].apply(lambda x: x.strip().rstrip('/').split('/')[-1])
+    df['LeetCode_Questions'] = df['No._of_Leetcode_question']
 
-    print("Fetching LeetCode data for students in parallel...")
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        leetcode_counts = list(executor.map(get_leetcode_questions, df['LeetCode_Username']))
-
-    df['LeetCode_Questions'] = leetcode_counts
     max_leetcode = df['LeetCode_Questions'].max()
     df['Normalized_LeetCode'] = 0 if max_leetcode == 0 else (df['LeetCode_Questions'] / max_leetcode) * 10
     df['Final_Score'] = (4 * df['CGPA']) + (2 * df['Normalized_LeetCode'])
@@ -111,19 +113,6 @@ def process_student_data(csv_file, num_sections):
         count = students_per_section + (1 if i < remainder else 0)
         df.loc[current_index: current_index + count - 1, 'Section'] = section
         current_index += count
-
-    for _, row in df.iterrows():
-        if row['Previous_Section'] != row['Section']:
-            try:
-                send_notification(
-                    email=row['Email'],
-                    name=row['Name'],
-                    previous_section=row['Previous_Section'],
-                    current_section=row['Section'],
-                    mail=mail  # ✅ pass mail instance
-                )
-            except Exception as e:
-                print(f"Failed to send email to {row['Email']}: {str(e)}")
 
     processed_file_path = os.path.join(PROCESSED_FOLDER, "grouped_students.csv")
     df.to_csv(processed_file_path, index=False)
@@ -164,6 +153,68 @@ def test_email():
         return jsonify({'message': 'Test email sent successfully! Please check your inbox.'})
     except Exception as e:
         return jsonify({'error': f'Failed to send test email: {str(e)}'}), 500
+
+def get_leetcode_questions_bs(leetcode_id):
+    url = f"https://leetcode.com/{leetcode_id}/"
+    response = requests.get(url)
+    if response.status_code != 200:
+        return None
+    soup = BeautifulSoup(response.text, "html.parser")
+    # This selector may need adjustment if LeetCode changes its HTML
+    solved = soup.find("span", string="Solved")
+    if solved:
+        parent = solved.find_parent("div")
+        if parent:
+            count_span = parent.find("span", class_="text-label-1 dark:text-dark-label-1 font-medium text-lg")
+            if count_span:
+                try:
+                    return int(count_span.text.strip())
+                except ValueError:
+                    return None
+    return None
+
+@app.route('/verify', methods=['POST'])
+def verify_students():
+    students = request.json.get('students', [])
+    results = []
+
+    def verify_one(student):
+        leetcode_id = student.get('LeetCode_ID')
+        reported_count = int(student.get('No_of_Leetcode_question') or 0)
+        actual_count = get_leetcode_questions(leetcode_id)
+        verified = (actual_count is not None) and (reported_count == actual_count)
+        return {
+            'LeetCode_ID': leetcode_id,
+            'Verified': verified,
+            'Actual_Leetcode_Questions': actual_count
+        }
+
+    with ThreadPoolExecutor(max_workers=8) as executor:  # Adjust max_workers as needed
+        results = list(executor.map(verify_one, students))
+
+    return jsonify({'results': results})
+
+@app.route('/send-emails', methods=['POST', 'OPTIONS'])
+def send_emails():
+    if request.method == 'OPTIONS':
+        # Handle preflight CORS request
+        return '', 200
+    data = request.get_json()
+    students = data.get('students', [])
+    message = data.get('message', '')
+    for student in students:
+        try:
+            send_notification(
+                email=student['Email'],
+                name=student['Name'],
+                previous_section=student.get('Previous_Section', ''),
+                current_section=student.get('Section', ''),
+                mail=mail,
+                custom_message=message
+            )
+        except Exception as e:
+            print(f"Failed to send email to {student['Email']}: {str(e)}")
+    return jsonify({'message': f'Emails sent to {len(students)} students.'})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
