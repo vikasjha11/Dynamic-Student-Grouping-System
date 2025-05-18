@@ -6,10 +6,7 @@ from flask_mail import Mail
 from email_service import send_notification
 from emailconfig import SMTP_SERVER, SMTP_PORT, EMAIL_SENDER, EMAIL_PASSWORD
 import requests
-import json
-import concurrent.futures
 import time
-from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 
 app = Flask(__name__)
@@ -22,7 +19,7 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = EMAIL_SENDER
 app.config['MAIL_PASSWORD'] = EMAIL_PASSWORD
-app.config['MAIL_DEFAULT_SENDER'] = EMAIL_SENDER  # ✅ fix for default sender
+app.config['MAIL_DEFAULT_SENDER'] = EMAIL_SENDER  
 
 mail = Mail(app)
 
@@ -154,25 +151,6 @@ def test_email():
     except Exception as e:
         return jsonify({'error': f'Failed to send test email: {str(e)}'}), 500
 
-def get_leetcode_questions_bs(leetcode_id):
-    url = f"https://leetcode.com/{leetcode_id}/"
-    response = requests.get(url)
-    if response.status_code != 200:
-        return None
-    soup = BeautifulSoup(response.text, "html.parser")
-    # This selector may need adjustment if LeetCode changes its HTML
-    solved = soup.find("span", string="Solved")
-    if solved:
-        parent = solved.find_parent("div")
-        if parent:
-            count_span = parent.find("span", class_="text-label-1 dark:text-dark-label-1 font-medium text-lg")
-            if count_span:
-                try:
-                    return int(count_span.text.strip())
-                except ValueError:
-                    return None
-    return None
-
 @app.route('/verify', methods=['POST'])
 def verify_students():
     students = request.json.get('students', [])
@@ -180,8 +158,10 @@ def verify_students():
 
     def verify_one(student):
         leetcode_id = student.get('LeetCode_ID')
+        print(f"Verifying {leetcode_id} ...")
         reported_count = int(student.get('No_of_Leetcode_question') or 0)
-        actual_count = get_leetcode_questions(leetcode_id)
+        actual_count = get_leetcode_questions(leetcode_id, delay=5)
+        print(f"Done {leetcode_id}: {actual_count}")
         verified = (actual_count is not None) and (reported_count == actual_count)
         return {
             'LeetCode_ID': leetcode_id,
@@ -189,7 +169,7 @@ def verify_students():
             'Actual_Leetcode_Questions': actual_count
         }
 
-    with ThreadPoolExecutor(max_workers=8) as executor:  # Adjust max_workers as needed
+    with ThreadPoolExecutor(max_workers=2) as executor:
         results = list(executor.map(verify_one, students))
 
     return jsonify({'results': results})
@@ -210,7 +190,11 @@ def send_emails():
                 previous_section=student.get('Previous_Section', ''),
                 current_section=student.get('Section', ''),
                 mail=mail,
-                custom_message=message
+                custom_message=message,
+                cgpa=student.get('CGPA'),
+                leetcode_questions=student.get('LeetCode_Questions'),
+                leetcode_id=student.get('LeetCode_ID'),
+                final_score=student.get('Final_Score')
             )
         except Exception as e:
             print(f"Failed to send email to {student['Email']}: {str(e)}")

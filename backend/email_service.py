@@ -1,31 +1,38 @@
 from flask_mail import Message
 
-def send_notification(email, name, previous_section, current_section, mail, custom_message=None):
-    subject = "Student Grouping Update – Project Trial Notification"
+def send_notification(
+    email, name, previous_section, current_section, mail,
+    custom_message=None, cgpa=None, leetcode_questions=None, leetcode_id=None, final_score=None
+):
+    subject = "Section Update Notification – Dynamic Student Grouping System Trial"
     if custom_message:
-        # Replace placeholders with actual values
-        message_body = custom_message.replace(
-            "[Recipient Name]", name or ""
-        ).replace(
-            "{previous_section or 'N/A'}", previous_section if previous_section else "N/A"
-        ).replace(
-            "{current_section}", current_section or ""
+        message_body = (
+            custom_message.replace("[Recipient Name]", name or "")
+            .replace("{previous_section}", previous_section if previous_section else "N/A")
+            .replace("{current_section}", current_section if current_section else "N/A")
+            .replace("{cgpa}", str(cgpa) if cgpa is not None else "N/A")
+            .replace("{leetcode_questions}", str(leetcode_questions) if leetcode_questions is not None else "N/A")
+            .replace("{leetcode_id}", leetcode_id or "N/A")
+            .replace("{final_score}", str(final_score) if final_score is not None else "N/A")
         )
     else:
-        message_body = f"""Dear {name},
+        message_body = f"""Greetings from the Dynamic Student Grouping System Team at Graphic Era Hill University,
 
-Greetings from the Dynamic Student Grouping System Team at Graphic Era Hill University.
+We hope this message finds you well. As part of our academic initiative to optimize student group allocation, we are conducting a test run of our system. We’re pleased to inform you that your section details have been successfully updated.
 
-We are currently conducting a project trial as part of our academic initiative to streamline student allocation. Your section information has been updated in our system:
+Here are your updated and analyzed details:
 
-Previous Section: {previous_section or 'N/A'}
+CGPA: {cgpa}
+LeetCode Questions Solved: {leetcode_questions}
+LeetCode ID: {leetcode_id}
+Final Score: {final_score}
+Previous Section: {previous_section}
 New Section: {current_section}
 
-This message is part of a test run of our grouping system. Please feel free to reach out if you have any questions or concerns regarding this update.
+This update is part of our ongoing system trial to evaluate its effectiveness and accuracy. If you have any questions, concerns, or feedback, please don’t hesitate to reach out. Your input is valuable to us as we work towards a seamless and efficient student grouping process.
 
-Warm Regards,
-Dynamic Student Grouping System Team
-Graphic Era Hill University
+Warm regards,
+Team – Dynamic Student Grouping System
 """
 
     msg = Message(subject, recipients=[email])

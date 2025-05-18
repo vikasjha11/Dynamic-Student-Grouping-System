@@ -44,16 +44,22 @@ export function ResultPage() {
 
 Greetings from the Dynamic Student Grouping System Team at Graphic Era Hill University.
 
-We are currently conducting a project trial as part of our academic initiative to streamline student allocation. Your section information has been updated in our system:
+We hope this message finds you well. As part of our academic initiative to optimize student group allocation, we are conducting a test run of our system. We’re pleased to inform you that your section details have been successfully updated.
 
-Previous Section: {previous_section or 'N/A'}
+Here are your updated and analyzed details:
+
+CGPA: {cgpa}
+LeetCode Questions Solved: {leetcode_questions}
+LeetCode ID: {leetcode_id}
+Final Score: {final_score}
+Previous Section: {previous_section}
 New Section: {current_section}
 
-This message is part of a test run of our grouping system. Please feel free to reach out if you have any questions or concerns regarding this update.
+This update is part of our ongoing system trial to evaluate its effectiveness and accuracy. If you have any questions, concerns, or feedback, please don’t hesitate to reach out. Your input is valuable to us as we work towards a seamless and efficient student grouping process.
 
-Warm Regards,
-Dynamic Student Grouping System Team
-Graphic Era Hill University`
+Warm regards,
+Team – Dynamic Student Grouping System
+`
   );
 
   const groupedStudents = groupBySection(students);
@@ -152,16 +158,30 @@ Graphic Era Hill University`
       s.Final_Score = Number(s.Final_Score.toFixed(3));
     });
 
+    // Sort in descending order of Final_Score
     const sorted = [...updated].sort((a, b) => b.Final_Score - a.Final_Score);
+
+    // Section allocation logic (block allocation)
     const numSections = [...new Set(students.map(s => s.Section))].length;
     const sectionLabels = Array.from({ length: numSections }, (_, i) =>
       String.fromCharCode(65 + i)
     );
-    sorted.forEach((student, idx) => {
-      student.Previous_Section = student.Section;
-      student.Section = sectionLabels[idx % numSections];
+    const numStudents = sorted.length;
+    const studentsPerSection = Math.floor(numStudents / numSections);
+    const remainder = numStudents % numSections;
+    let currentIndex = 0;
+
+    sectionLabels.forEach((section, i) => {
+      const count = studentsPerSection + (i < remainder ? 1 : 0);
+      for (let j = currentIndex; j < currentIndex + count; j++) {
+        if (sorted[j]) {
+          sorted[j].Previous_Section = sorted[j].Section;
+          sorted[j].Section = section;
+        }
+      }
+      currentIndex += count;
     });
-    sorted.sort((a, b) => a._idx - b._idx);
+
     setStudents(sorted);
   };
 
