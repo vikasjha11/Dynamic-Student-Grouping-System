@@ -8,11 +8,11 @@ A professional web application for automated, data-driven student section alloca
 
 ### 1. Summary Report & Actions
 
-![Summary Report](./screenshots/summary-report.png)
+![Summary Report](../screenshots/summary-report.png)
 
 ### 2. Section-wise Student Allocation
 
-![Section Allocation](./screenshots/section-allocation.png)
+![Section Allocation](../screenshots/section-allocation.png)
 
 ---
 
