@@ -12,6 +12,12 @@
 /build
 /venv
 
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
 # misc
 .DS_Store
 .env.local
