@@ -4,6 +4,18 @@ A professional web application for automated, data-driven student section alloca
 
 ---
 
+## Screenshots
+
+### 1. Summary Report & Actions
+
+![Summary Report](./screenshots/summary-report.png)
+
+### 2. Section-wise Student Allocation
+
+![Section Allocation](./screenshots/section-allocation.png)
+
+---
+
 ## Features
 
 - **Automated Section Allocation:**  
@@ -38,3 +50,4 @@ A professional web application for automated, data-driven student section alloca
 ```bash
 git clone https://github.com/yourusername/dynamic-student-grouping.git
 cd dynamic-student-grouping
+```
