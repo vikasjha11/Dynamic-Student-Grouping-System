@@ -145,7 +145,7 @@ def test_email():
             name="Test User",
             previous_section="A",
             current_section="B",
-            mail=mail  # ✅ pass mail instance
+            mail=mail 
         )
         return jsonify({'message': 'Test email sent successfully! Please check your inbox.'})
     except Exception as e:

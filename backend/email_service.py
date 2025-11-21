@@ -40,6 +40,6 @@ Team – Dynamic Student Grouping System
 
     try:
         mail.send(msg)
-        print(f"✅ Email sent to {email}")
+        print(f" Email sent to {email}")
     except Exception as e:
-        print(f"❌ Failed to send email to {email}: {str(e)}")
+        print(f" Failed to send email to {email}: {str(e)}")
